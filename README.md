@@ -82,7 +82,18 @@ PMVGD/
 ```
 
 ---
+## ⚙️ Environment & Dependencies  
 
+The PMVGD codebase has been tested under the following environment:  
+
+- **Python**: 3.10.8  
+- **PyTorch**: 2.1.2  
+- **PyTorch Geometric**: 2.3.1  
+- **CUDA**: 12.6  
+- **PyHealth**: 1.1.4  
+
+> ⚠️ It is recommended to use a GPU with CUDA support to ensure efficient training of graph models.  
+---
 ## 📢 Release Plan  
 
 - ✅ **Phase 1**: Teacher pretraining (released now)  
