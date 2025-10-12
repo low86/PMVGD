@@ -2,7 +2,7 @@
 
 Official implementation of our paper:  
 > **PMVGD: A Progressive Multi-View Graph Distillation Paradigm for Health Event Prediction**  
-> *Information Fusion, 2026*  
+> *Submit to Information Fusion, 2026*  
 
 ---
 
@@ -48,7 +48,7 @@ python -m experiments.run_phase1 \
   --dataset mimic4 \
   --model teacher \
   --epoch_main 70 \
-  --mimic3_path "PATH/TO/mimic4/hosp"
+  --mimic4_path "PATH/TO/mimic4/hosp"
 ```
 
 > *Default checkpoints will be saved in `./ckpt/phase1/`.*  
