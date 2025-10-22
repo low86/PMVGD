@@ -2,7 +2,6 @@
 
 Official implementation of our paper:  
 > **PMVGD: A Progressive Multi-View Graph Distillation Paradigm for Health Event Prediction**  
-> *Submit to Information Fusion, 2026*  
 
 ---
 
