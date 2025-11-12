@@ -11,23 +11,19 @@ def split_ids_from_list_pkl(
         test_ratio=0.15,
         seed=42,
 ):
-    # 检查比例合法性
     if round(train_ratio + val_ratio + test_ratio, 5) != 1.0:
         raise ValueError("train + val + test ratios must sum to 1.")
 
-    # 读取 list 格式的 pkl 文件
     if not os.path.exists(pkl_path):
         raise FileNotFoundError(f"Pkl file not found: {pkl_path}")
 
     with open(pkl_path, 'rb') as f:
         graph_list = pickle.load(f)  # List[HeteroData]
 
-    # 生成 ID 列表并打乱
     all_ids = list(range(len(graph_list)))
     random.seed(seed)
     random.shuffle(all_ids)
 
-    # 划分
     total = len(all_ids)
     train_end = int(total * train_ratio)
     val_end = train_end + int(total * val_ratio)
@@ -36,7 +32,6 @@ def split_ids_from_list_pkl(
     val_ids = all_ids[train_end:val_end]
     test_ids = all_ids[val_end:]
 
-    # 保存为文本文件
     os.makedirs(save_dir, exist_ok=True)
     for split_name, split_ids in zip(["train", "val", "test"], [train_ids, val_ids, test_ids]):
         with open(os.path.join(save_dir, f"{split_name}_ids.txt"), "w") as f:
@@ -55,23 +50,19 @@ def split_ids_from_list_pkl_chunk(
         seed=42,
         chunk=-1,
 ):
-    # 检查比例合法性
     if round(train_ratio + val_ratio + test_ratio, 5) != 1.0:
         raise ValueError("train + val + test ratios must sum to 1.")
 
-    # 读取 list 格式的 pkl 文件
     if not os.path.exists(pkl_path):
         raise FileNotFoundError(f"Pkl file not found: {pkl_path}")
 
     with open(pkl_path, 'rb') as f:
         graph_list = pickle.load(f)  # List[HeteroData]
 
-    # 生成 ID 列表并打乱
     all_ids = list(range(len(graph_list)))
     random.seed(seed)
     random.shuffle(all_ids)
 
-    # 划分
     total = len(all_ids)
     train_end = int(total * train_ratio)
     val_end = train_end + int(total * val_ratio)
@@ -80,7 +71,6 @@ def split_ids_from_list_pkl_chunk(
     val_ids = all_ids[train_end:val_end]
     test_ids = all_ids[val_end:]
 
-    # 保存为文本文件
     os.makedirs(save_dir, exist_ok=True)
     for split_name, split_ids in zip(["train", "val", "test"], [train_ids, val_ids, test_ids]):
         with open(os.path.join(save_dir, f"{split_name}_ids_chunk{chunk}.txt"), "w") as f:
