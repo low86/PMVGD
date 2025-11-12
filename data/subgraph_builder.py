@@ -1,5 +1,4 @@
 """
-Author: Tian Yuxuan
 Date: 2025-07-16
 """
 import pickle
