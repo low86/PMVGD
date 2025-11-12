@@ -1,5 +1,4 @@
 """
-Author: Tian Yuxuan
 Date: 2025-08-16
 """
 import torch
