@@ -4,7 +4,6 @@ Phase 1 trainer: Teacher pretraining.
 Receives prepared dataloaders and a model instance from experiments/*.py,
 runs the training loop, saves best checkpoint by validation loss, and
 periodically evaluates using test_phase_one (exactly as in your original script).
-Author: Tian Yuxuan
 Date: 2025-08-24
 """
 
