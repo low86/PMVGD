@@ -1,7 +1,6 @@
 """
 Experiment launcher for Phase 1.
 This script prepares dataset/tokenizers/cache/splits and then calls trainers.phase1_pretrain.run_phase1.
-Author: Tian Yuxuan
 Date: 2025-08-21
 """
 
