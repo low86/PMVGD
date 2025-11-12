@@ -1,7 +1,6 @@
 """
 Run the full pipeline in sequence: Phase1 -> Phase2 -> Phase3.
 This script simply calls the three experiment launchers in order.
-Author: Tian Yuxuan
 Date: 2025-08-021
 """
 
