@@ -1,6 +1,5 @@
 """
 Test code for PMVGD on MIMIC-III / MIMIC-IV datasets.
-Author: Tian Yuxuan
 Date: 2025-08-09
 """
 import random
