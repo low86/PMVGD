@@ -1,4 +1,4 @@
-# PMVGD: A Progressive Multi-View Graph Distillation Paradigm for Health Event Prediction 
+# PMVGD: Progressive Multi-View Graph Distillation for Health Event Prediction 
 
 Official implementation of our paper:  
 > **PMVGD: Progressive Multi-View Graph Distillation for Health Event Prediction**  
