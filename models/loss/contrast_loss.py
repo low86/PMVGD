@@ -17,7 +17,7 @@ class ContrastiveLearner:
         key = F.normalize(key, dim=1)
 
         logits = torch.matmul(query, key.T) / self.temperature  # shape (B, B)
-        labels = torch.arange(query.size(0)).to(query.device)   # 正样本是对角线
+        labels = torch.arange(query.size(0)).to(query.device)   
 
         loss = F.cross_entropy(logits, labels)
         return loss
