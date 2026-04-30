@@ -99,14 +99,14 @@ def get_parent_tokenizers(task_dataset, keys = ['cond_hist', 'procedures']):
         parent_tokenizers[feature_key + '_parent'] = Tokenizer(tokens=list(parent_tokens), special_tokens=["<pad>"])
     return parent_tokenizers
 
-# 自适应温度
+
 def adaptive_temperature(logits):
     probs = F.softmax(logits, dim=1)
     entropy = -torch.sum(probs * torch.log(probs + 1e-10), dim=1)
     tau = 1.0 + 2.0 * entropy / torch.max(entropy)
     return tau.unsqueeze(1)
 
-# 权重增强
+
 def compute_weights(logits_aux, labels):
     preds = (logits_aux.sigmoid() > 0.5).float()
     misclassified = (preds != labels).float()
@@ -118,7 +118,7 @@ def train_phase_one(data_loader, model, label_tokenizer, optimizer, device):
     for data in data_loader:
         model.train()
         optimizer.zero_grad()
-        # 统一数据访问方式
+        
         if type(data) == dict:
             label = prepare_labels(data['conditions'], label_tokenizer).to(device)
         else:
@@ -136,7 +136,7 @@ def valid_phase_one(data_loader, model, label_tokenizer, device):
     with torch.no_grad():
         for data in data_loader:
             model.eval()
-            # 统一数据访问方式
+            
             if type(data) == dict:
                 label = prepare_labels(data['conditions'], label_tokenizer).to(device)
             else:
@@ -153,7 +153,7 @@ def test_phase_one(data_loader, model, label_tokenizer, device, show_progress=Fa
     with torch.no_grad():
         for data in tqdm(data_loader, desc=" Testing ", leave=False, disable=not show_progress):
             model.eval()
-            # 统一数据访问方式
+            
             if type(data) == dict:
                 label = prepare_labels(data['conditions'], label_tokenizer).to(device)
             else:
@@ -172,7 +172,7 @@ def evaluate(data_loader, model, label_tokenizer, device, show_progress=False):
     with torch.no_grad():
         for data in tqdm(data_loader, desc=" Testing ", leave=False, disable=not show_progress):
             model.eval()
-            # 统一数据访问方式
+            
             if type(data) == dict:
                 label = prepare_labels(data['conditions'], label_tokenizer).to(device)
             else:
@@ -199,27 +199,27 @@ def train_phase_two(train_aux_loader, main_model, aux_model1, aux_model2, label_
         x_main = (seq_batch, graph_batch)
         x_aux1 = drug_batch.to(device)
         x_aux2 = procedure_batch.to(device)
-        # 统一数据访问方式
+        
         if type(data) == dict:
             label = prepare_labels(data['conditions'], label_tokenizer).to(device)
         else:
             label = prepare_labels(data[0]['conditions'], label_tokenizer).to(device)
-        # 主视图编码（仅表征）
+        
         with torch.no_grad():
             logit_main, pe, z_main = main_model(x_main)
-        # 辅视图输出 logits + representation
+        
         logit_aux1, z_aux1 = aux_model1(x_aux1, pe)
         logit_aux2, z_aux2 = aux_model2(x_aux2, pe)
-        # 表征对齐损失
+        
         contrast_loss1 = contrast.info_nce_loss(z_aux1, z_main)
         contrast_loss2 = contrast.info_nce_loss(z_aux2, z_main)
         contrast_loss = contrast_loss1 + contrast_loss2
-        #预测损失
+        
         weights = compute_weights(logit_main, label)
         pred_loss1 = F.binary_cross_entropy_with_logits(logit_aux1, label, weights)
         pred_loss2 = F.binary_cross_entropy_with_logits(logit_aux2, label, weights)
         pred_loss = pred_loss1 + pred_loss2
-        #计算总损失
+        
         total_loss = 0.05 * contrast_loss + pred_loss
 
         optimizer_aux.zero_grad()
@@ -276,7 +276,7 @@ def train_phase_kd(aux_models, aux_names, stage, train_aux_loader,  main_model,
             label = prepare_labels(data['conditions'], label_tokenizer).to(device)
         else:
             label = prepare_labels(data[0]['conditions'], label_tokenizer).to(device)
-        # 损失项
+        
         weights = compute_weights(logit_aux, label)
         loss_label = F.binary_cross_entropy_with_logits(logit_main, label, weight=weights)
         loss_repr = contrast.info_nce_loss(z_main, z_aux.detach())
@@ -308,21 +308,21 @@ class LossVisualizer:
         os.makedirs(self.save_dir, exist_ok=True)
 
     def add_train_val_loss(self, train_loss, val_loss):
-        """添加每个epoch的训练和验证损失"""
+        
         self.train_losses.append(train_loss)
         self.val_losses.append(val_loss)
 
     def plot_and_save(self, dpi=300):
-        """绘制并保存损失曲线图"""
+        
         plt.figure(figsize=(10, 6))
         epochs = range(1, len(self.train_losses) + 1)
-        # 绘制训练和验证曲线
+        
         plt.plot(epochs, self.train_losses,
                  label='Train Loss', color='royalblue', linewidth=2, alpha=0.8)
         plt.plot(epochs, self.val_losses,
                  label='Validation Loss', color='darkorange', linewidth=2, alpha=0.8)
 
-        # 标注最佳验证损失点
+        
         best_val_idx = np.argmin(self.val_losses)
         best_val_epoch = epochs[best_val_idx]
         best_val_loss = self.val_losses[best_val_idx]
@@ -336,7 +336,7 @@ class LossVisualizer:
             label=f'Best Val Loss (Epoch {best_val_epoch})',
             zorder=3
         )
-        # 图表装饰
+       
         plt.title(f'Training Progress ({self.model_name} on {self.dataset})', fontsize=14)
         plt.xlabel('Epoch', fontsize=12)
         plt.ylabel('Loss', fontsize=12)
@@ -344,7 +344,7 @@ class LossVisualizer:
         plt.grid(True, linestyle='--', alpha=0.5)
         plt.tight_layout()
 
-        # 保存文件（自动生成唯一文件名）
+        
         fig_path = os.path.join(
             self.save_dir,
             f'loss_curve_{self.model_name}_{self.dataset}.png'
@@ -354,7 +354,7 @@ class LossVisualizer:
         return fig_path
 
     def save_loss_data(self, path):
-        """保存损失数据到文件"""
+        
         data = {
             'train_losses': self.train_losses,
             'val_losses': self.val_losses
@@ -363,7 +363,7 @@ class LossVisualizer:
 
     @classmethod
     def load_loss_data(cls, path):
-        """从文件加载损失数据"""
+        
         data = torch.load(path)
         visualizer = cls()
         visualizer.train_losses = data['train_losses']

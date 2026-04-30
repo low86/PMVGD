@@ -7,7 +7,7 @@ Official implementation of our paper:
 
 ## 🔥 Introduction  
 
-To address the trade-off between noisy full-graph modeling and information loss in simplified graphs, we propose a **Progressive Multi-View Graph Distillation paradigm (PMVGD)** for health event prediction.  
+To address the trade-off between noisy full-graph modeling and information loss in simplified graphs, we propose a **Progressive Multi-View Graph Distillation framework (PMVGD)** for health event prediction.  
 
 Specifically, we construct multi-view graphs from EHR and adopt a progressive teacher–student learning process to integrate complementary clinical signals.
 
@@ -26,7 +26,7 @@ Altogether, PMVGD converts distillation from a static, one-shot compression into
 ## 📊 Training Pipeline  
 
 <p align="center">
-  <img src="assets/pipeline.png" width="100%">
+  <img src="assets/pipeline.jpg" width="100%">
 </p>
 
 ---
