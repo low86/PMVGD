@@ -5,4 +5,3 @@ __pycache__/
 # Generated experiment artifacts
 cache/
 ckpt/
-models/encoder/__pycache__/student_med.cpython-310.pyc
