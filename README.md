@@ -24,22 +24,15 @@ PMVGD is trained in three stages.
 
 1. **Phase 1 — Teacher pretraining**
 
-   The teacher encoder learns from the compact disease graph and longitudinal EHR sequences. The Heterogeneous Bottleneck Fusion module combines diagnosis, medication, and procedure sequence signals, while the disease graph models patient trajectories.
+   Pretrain the teacher encoder on the disease graph.
 
 2. **Phase 2 — Multi-view collaborative learning**
 
-   The pretrained teacher is frozen. Medication and procedure student encoders are trained on their corresponding graph views with contrastive representation alignment and prediction supervision.
+   Train medication and procedure student encoders under teacher guidance.
 
 3. **Phase 3 — Back-distillation to the teacher**
 
-   The student encoders are frozen and transfer complementary knowledge back to the teacher. The objective combines prediction supervision, InfoNCE representation distillation, and label-wise Bernoulli KL distillation for multi-label diagnosis prediction.
-
-   Two controllers are available:
-
-   - `adaptive` (default): selects the student with the best similarity score after a history-aware penalty.
-   - `normal`: alternates medication and procedure students in fixed blocks of 10 epochs.
-
-During Phase 1, the repository creates and caches disease, medication, and procedure graphs. The same patient split is reused by all three phases.
+   Distill student knowledge back to refine the teacher encoder.
 
 ---
 
