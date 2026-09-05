@@ -100,21 +100,11 @@ def main():
     # call trainer
     run_phase1(train_loader, val_loader, test_loader, model, label_tokenizer, args, device, ckptpath)
 
-    # post-processing: same behavior as original main
-    if args.model == 'teacher':
-        # free and re-instantiate as in original script
-        del model
-        torch.cuda.empty_cache()
-        import gc
-        gc.collect()
-        device_cpu = torch.device('cpu')
-        model = Teacher(Tokenizers, args.hidden_size, len(task_dataset.get_all_tokens('conditions')), device_cpu,
-                        graph_meta=view_metas['patient_disease'])
-
     # load best model and final test
     best_model = torch.load(ckptpath, map_location=device)
     model.load_state_dict(best_model)
     model = model.to(device)
+    model.device = device
     y_true, y_prob = test_phase_one(test_loader, model, label_tokenizer, device)
     print(f"Code Level Metrics: {code_level(y_true, y_prob)}")
     print(f"Visit Level Metrics: {visit_level(y_true, y_prob)}")

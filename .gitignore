@@ -2,3 +2,7 @@
 __pycache__/
 *.py[cod]
 
+# Generated experiment artifacts
+cache/
+ckpt/
+models/encoder/__pycache__/student_med.cpython-310.pyc

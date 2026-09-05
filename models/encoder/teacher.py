@@ -1,4 +1,5 @@
 """
+Author: Tian Yuxuan
 Date: 2025-08-16
 """
 import torch
@@ -68,14 +69,6 @@ class Teacher(nn.Module):
             padding_idx=tokenizer.get_padding_index(),
         )
 
-    def get_embedder(self):
-        feature = {}
-        for k in self.embeddings.keys():
-            lenth = self.feat_tokenizers[k].get_vocabulary_size()
-            tensor = torch.arange(0, lenth, dtype=torch.long).to(self.device)
-            feature[k] = self.embeddings[k](tensor)
-        return feature
-
     def process_seq(self, seqdata):
         patient_emb = []
         patient_cls = []
@@ -99,17 +92,33 @@ class Teacher(nn.Module):
         return logits, fused_repr
 
     def process_graph_fea(self, graph_list, pe):
-        f = self.get_embedder()
-        for i in range(len(graph_list)):
-            for node_type, x in graph_list[i].x_dict.items():
-                if node_type != 'visit':
-                    graph_list[i][node_type].x = f[feats_to_nodes[node_type]]
+        raw_graphs = graph_list.to_data_list() if isinstance(graph_list, Batch) else graph_list
+        # Clone per-sample graphs to avoid in-place mutation of dataset-held objects.
+        graphs = [g.clone() for g in raw_graphs]
+        for i in range(len(graphs)):
+            for node_type in graphs[i].node_types:
+                if node_type != 'visit' and node_type in feats_to_nodes:
+                    store = graphs[i][node_type]
+                    node_id = getattr(store, 'node_id', None)
+                    num_nodes = getattr(store, 'num_nodes', None)
+                    if num_nodes is None:
+                        if node_id is not None:
+                            num_nodes = int(node_id.shape[0])
+                        elif hasattr(store, 'x'):
+                            num_nodes = int(store.x.shape[0])
+                        else:
+                            raise ValueError(f"Cannot infer num_nodes for node type: {node_type}")
+                    if node_id is None:
+                        node_id = torch.arange(int(num_nodes), dtype=torch.long)
+                    node_id = node_id.to(self.device)
+                    emb_key = feats_to_nodes[node_type]
+                    graphs[i][node_type].x = self.embeddings[emb_key](node_id)
                 if node_type == 'visit':
                     timevec = self.tim2vec(
-                        torch.tensor(graph_list[i]['visit'].time, dtype=torch.float32, device=self.device))
-                    num_visit = graph_list[i]['visit'].x.shape[0]
-                    graph_list[i]['visit'].x = torch.cat([pe[i].repeat(num_visit, 1), timevec], dim=-1)
-        return Batch.from_data_list(graph_list)
+                        torch.as_tensor(graphs[i]['visit'].time, dtype=torch.float32, device=self.device))
+                    num_visit = int(getattr(graphs[i]['visit'], 'num_nodes', len(graphs[i]['visit'].time)))
+                    graphs[i]['visit'].x = torch.cat([pe[i].repeat(num_visit, 1), timevec], dim=-1)
+        return Batch.from_data_list(graphs)
 
     def forward(self, batchdata):
 
