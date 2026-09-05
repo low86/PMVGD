@@ -254,8 +254,26 @@ def test_phase_two(data_loader, model, main_model, label_tokenizer, device, show
         y_prob = np.concatenate(y_p_all, axis=0)
     return y_true, y_prob
 
+def bernoulli_kl_divergence(student_logits, teacher_logits, temperature):
+    """Compute label-wise Bernoulli KL for multi-label distillation."""
+    student_scaled = student_logits / temperature
+    teacher_scaled = teacher_logits / temperature
+    teacher_prob = torch.sigmoid(teacher_scaled).detach()
+    teacher_log_prob = F.logsigmoid(teacher_scaled).detach()
+    teacher_log_not_prob = F.logsigmoid(-teacher_scaled).detach()
+    student_log_prob = F.logsigmoid(student_scaled)
+    student_log_not_prob = F.logsigmoid(-student_scaled)
+
+    kl_per_label = (
+        teacher_prob * (teacher_log_prob - student_log_prob)
+        + (1 - teacher_prob) * (teacher_log_not_prob - student_log_not_prob)
+    )
+    return kl_per_label.mean() * (temperature ** 2)
+
+
 def train_phase_kd(aux_models, aux_names, stage, train_aux_loader,  main_model,
-                       lambda_kd, lambda_repr, label_tokenizer, contrast, optimizer, device):
+                       lambda_kd, lambda_repr, label_tokenizer, contrast, optimizer, device,
+                       temperature=2.0):
     total_contrast_loss = 0.0
     total_pred_loss = 0.0
     total_kd_loss = 0.0
@@ -270,7 +288,7 @@ def train_phase_kd(aux_models, aux_names, stage, train_aux_loader,  main_model,
         logit_main, pe, z_main = main_model(x_main)
 
         with torch.no_grad():
-            x_aux = drug_batch.to(device) if aux_name == 'treatment' else procedure_batch.to(device)
+            x_aux = drug_batch.to(device) if aux_name == 'medication' else procedure_batch.to(device)
             logit_aux, z_aux = aux_model(x_aux, pe)
         if type(data) == dict:
             label = prepare_labels(data['conditions'], label_tokenizer).to(device)
@@ -280,12 +298,7 @@ def train_phase_kd(aux_models, aux_names, stage, train_aux_loader,  main_model,
         weights = compute_weights(logit_aux, label)
         loss_label = F.binary_cross_entropy_with_logits(logit_main, label, weight=weights)
         loss_repr = contrast.info_nce_loss(z_main, z_aux.detach())
-        tau = 2.0
-        # tau = adaptive_temperature(logit_aux)
-        yT = F.softmax(logit_aux / tau, dim=1).detach()
-        yS = F.log_softmax(logit_main / tau, dim=1)
-        # loss_kd = F.kl_div(yS, yT, reduction='batchmean') * (torch.mean(tau) ** 2)
-        loss_kd = F.kl_div(yS, yT, reduction='batchmean') * (tau ** 2)
+        loss_kd = bernoulli_kl_divergence(logit_main, logit_aux, temperature)
         loss = loss_label + lambda_repr * loss_repr + lambda_kd * loss_kd
         optimizer.zero_grad()
         loss.backward()
