@@ -5,22 +5,11 @@ Official implementation of our paper:
 
 ---
 
-## 🔥 Introduction  
+## 🔐 Data Access
 
-To address the trade-off between noisy full-graph modeling and information loss in simplified graphs, we propose a **Progressive Multi-View Graph Distillation framework (PMVGD)** for health event prediction.  
+This study uses the MIMIC dataset hosted by PhysioNet. Due to PhysioNet's data access policy, we are not permitted to redistribute the dataset. Researchers can apply for authorized access through the official PhysioNet page:
 
-Specifically, we construct multi-view graphs from EHR and adopt a progressive teacher–student learning process to integrate complementary clinical signals.
-
-1. **Phase 1: Teacher Encoder Pretraining**  
-    Pretrain the teacher on the disease graph to learn robust clinical patterns.
-
-2. **Phase 2: Multi-View Graph Collaborative Learning**  
-   Train student encoders on procedure and medication graphs under teacher guidance.
-
-3. **Phase 3: Adaptive Sequential Distillation**  
-   Distill multi-view knowledge back into the teacher for refined prediction.
-
-Altogether, PMVGD converts distillation from a static, one-shot compression into an iterative cycle of mutual refinement.  
+[https://physionet.org/content/mimiciii/1.4/](https://physionet.org/content/mimiciii/1.4/)
 
 ---
 ## 📊 Training Pipeline  
