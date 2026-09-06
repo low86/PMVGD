@@ -180,7 +180,7 @@ PMVGD/
 │   └── phase3_distill.py
 ├── utils/                            # Dataloading, metrics, and training helpers
 ├── cache/                            # Generated graph caches
-├── ckpt/                             # Generated checkpoints and selection logs
+├── ckpt/                             # Generated checkpoints
 └── README.md
 ```
 
