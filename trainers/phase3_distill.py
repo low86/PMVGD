@@ -99,7 +99,7 @@ def run_phase3(train_aux_loader,
     aux_models = [aux_model1, aux_model2]
     aux_names = list(AUX_VIEW_NAMES)
     num_stages = len(aux_models)
-    controller = getattr(args, 'distill_controller', 'adaptive')
+    controller = getattr(args, 'distill_controller', 'normal')
     history_penalty = getattr(args, 'history_penalty', 0.03)
     switch_interval = getattr(args, 'switch_interval', 10)
     history_counts = [0 for _ in aux_models]

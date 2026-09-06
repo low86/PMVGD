@@ -43,8 +43,8 @@ def main():
     parser.add_argument('--num_students', type=int, default=1)
     parser.add_argument('--alpha', type=float, default=0.5)
     parser.add_argument('--temperature', type=float, default=2.0)
-    parser.add_argument('--distill_controller', choices=['adaptive', 'normal'], default='adaptive',
-                        help='adaptive: similarity/history selection; normal: alternate views in fixed blocks.')
+    parser.add_argument('--distill_controller', choices=['adaptive', 'normal'], default='normal',
+                        help='normal (default): alternate views in fixed blocks; adaptive: similarity/history selection.')
     parser.add_argument('--history_penalty', type=float, default=0.03,
                         help='History penalty coefficient for the adaptive controller (paper range: 0.01-0.05).')
     parser.add_argument('--switch_interval', type=int, default=10,

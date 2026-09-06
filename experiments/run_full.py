@@ -27,7 +27,7 @@ def parse_args():
     parser.add_argument("--epoch_view", type=int, default=20)
     parser.add_argument("--epoch_kd", type=int, default=50)
     parser.add_argument("--epoch_test", type=int, default=10)
-    parser.add_argument("--distill_controller", choices=["adaptive", "normal"], default="adaptive")
+    parser.add_argument("--distill_controller", choices=["adaptive", "normal"], default="normal")
     parser.add_argument("--history_penalty", type=float, default=0.03)
     parser.add_argument("--switch_interval", type=int, default=10)
     return parser.parse_args()
