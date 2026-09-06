@@ -2,7 +2,7 @@
 
 Official implementation of **PMVGD: Progressive Multi-View Graph Distillation for Health Event Prediction**.
 
-PMVGD learns from three complementary EHR graph views—disease, medication, and procedure—and transfers knowledge through a progressive teacher–student loop for next-visit diagnosis prediction.
+PMVGD learns from three complementary EHR graph views—disease, medication, and procedure—and transfers knowledge through a progressive teacher–student loop for health event prediction.
 
 ---
 
