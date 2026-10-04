@@ -62,7 +62,7 @@ MIMIC-III:
 python -m experiments.run_phase1 \
   --dataset mimic3 \
   --model teacher \
-  --epoch_main 130 \
+  --epoch_main 100 \
   --mimic3_path "PATH/TO/mimic3/hosp"
 ```
 
@@ -110,7 +110,7 @@ Run Phase 3 after the Phase 1 and Phase 2 prediction checkpoints are available.
 python -m experiments.run_phase3 \
   --dataset mimic3 \
   --model teacher \
-  --epoch_kd 50 \
+  --epoch_kd 40 \
   --mimic3_path "PATH/TO/mimic3/hosp"
 ```
 
@@ -120,7 +120,7 @@ MIMIC-IV:
 python -m experiments.run_phase3 \
   --dataset mimic4 \
   --model teacher \
-  --epoch_kd 50 \
+  --epoch_kd 40 \
   --mimic4_path "PATH/TO/mimic4/hosp"
 ```
 
@@ -132,9 +132,9 @@ The following command runs Phase 1, Phase 2, and Phase 3 in sequence:
 python -m experiments.run_full \
   --dataset mimic3 \
   --model teacher \
-  --epoch_main 130 \
+  --epoch_main 100 \
   --epoch_view 20 \
-  --epoch_kd 50 \
+  --epoch_kd 40 \
   --mimic3_path "PATH/TO/mimic3/hosp"
 ```
 
@@ -146,7 +146,7 @@ python -m experiments.run_full \
   --model teacher \
   --epoch_main 70 \
   --epoch_view 20 \
-  --epoch_kd 50 \
+  --epoch_kd 40 \
   --mimic4_path "PATH/TO/mimic4/hosp"
 ```
 
