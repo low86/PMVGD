@@ -1,6 +1,6 @@
 # trainers/phase3_distill.py
 """
-Phase 3 trainer: Adaptive sequential distillation.
+Phase 3 trainer: Sequential distillation.
 
 This trainer performs the sequential distillation stage using the
 auxiliary models to distill knowledge into the main model. It expects:
@@ -12,7 +12,6 @@ auxiliary models to distill knowledge into the main model. It expects:
 
 import random
 import argparse
-import torch.nn.functional as F
 from data.dataset import *
 from models.encoder import *
 from utils.dataloader import *
@@ -24,41 +23,6 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 
 
 AUX_VIEW_NAMES = ("medication", "procedure")
-
-
-@torch.no_grad()
-def select_adaptive_view(train_aux_loader, main_model, aux_models, history_counts, history_penalty, device):
-    """Select a student using mean cosine compatibility and selection history."""
-    was_training = main_model.training
-    main_model.eval()
-    similarity_sums = [0.0 for _ in aux_models]
-    patient_count = 0
-
-    for seq_batch, graph_batch, drug_batch, procedure_batch, _ in train_aux_loader:
-        _, patient_repr, teacher_repr = main_model((seq_batch, graph_batch))
-        _, medication_repr = aux_models[0](drug_batch.to(device), patient_repr)
-        _, procedure_repr = aux_models[1](procedure_batch.to(device), patient_repr)
-
-        for index, student_repr in enumerate((medication_repr, procedure_repr)):
-            similarity_sums[index] += F.cosine_similarity(
-                teacher_repr, student_repr, dim=1
-            ).sum().item()
-        patient_count += teacher_repr.size(0)
-
-    if was_training:
-        main_model.train()
-
-    similarities = [value / max(patient_count, 1) for value in similarity_sums]
-    total_selections = sum(history_counts)
-    normalized_history = [
-        count / max(total_selections, 1) for count in history_counts
-    ]
-    selection_scores = [
-        similarity - history_penalty * history
-        for similarity, history in zip(similarities, normalized_history)
-    ]
-    selected_stage = max(range(len(aux_models)), key=selection_scores.__getitem__)
-    return selected_stage, similarities, normalized_history, selection_scores
 
 def run_phase3(train_aux_loader,
                val_aux_loader,
@@ -99,10 +63,7 @@ def run_phase3(train_aux_loader,
     aux_models = [aux_model1, aux_model2]
     aux_names = list(AUX_VIEW_NAMES)
     num_stages = len(aux_models)
-    controller = getattr(args, 'distill_controller', 'normal')
-    history_penalty = getattr(args, 'history_penalty', 0.03)
     switch_interval = getattr(args, 'switch_interval', 10)
-    history_counts = [0 for _ in aux_models]
 
     best_code = float("-inf")
     best_visit = float("-inf")  # kept for parity with original (not used in save condition)
@@ -110,15 +71,7 @@ def run_phase3(train_aux_loader,
     pbar_kd = tqdm(range(args.epoch_kd), desc="Phase 3 Stage")
 
     for epoch in pbar_kd:
-        if controller == 'adaptive':
-            stage, _, _, _ = select_adaptive_view(
-                train_aux_loader, main_model, aux_models, history_counts,
-                history_penalty, device,
-            )
-        else:
-            stage = (epoch // switch_interval) % num_stages
-
-        history_counts[stage] += 1
+        stage = (epoch // switch_interval) % num_stages
 
         # train phase kd using the selected auxiliary view
         total_pred_loss, total_contrast_loss, total_kd_loss = train_phase_kd(
@@ -149,7 +102,7 @@ def run_phase3(train_aux_loader,
         scheduler.step()
 
         pbar_kd.set_description(
-            f"Phase 3 | {controller}:{aux_names[stage]} | Epoch {epoch + 1}/{args.epoch_kd} | "
+            f"Phase 3 | {aux_names[stage]} | Epoch {epoch + 1}/{args.epoch_kd} | "
             f"Repr: {avg_contrast_loss:.4f} | Pred: {avg_pred_loss:.4f} | "
             f"Kd: {avg_kd_loss:.4f} | Val_loss: {val_loss:.4f}"
         )

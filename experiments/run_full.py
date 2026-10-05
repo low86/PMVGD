@@ -27,8 +27,6 @@ def parse_args():
     parser.add_argument("--epoch_view", type=int, default=20)
     parser.add_argument("--epoch_kd", type=int, default=50)
     parser.add_argument("--epoch_test", type=int, default=10)
-    parser.add_argument("--distill_controller", choices=["adaptive", "normal"], default="normal")
-    parser.add_argument("--history_penalty", type=float, default=0.03)
     parser.add_argument("--switch_interval", type=int, default=10)
     return parser.parse_args()
 
@@ -64,8 +62,6 @@ def main():
             "Phase 3", "experiments.run_phase3",
             [
                 "--epoch_kd", str(args.epoch_kd),
-                "--distill_controller", args.distill_controller,
-                "--history_penalty", str(args.history_penalty),
                 "--switch_interval", str(args.switch_interval),
             ],
             phase3_ckpt,
